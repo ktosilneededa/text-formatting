@@ -1,14 +1,13 @@
 from win32com import client
 import os
 
-wordApp = client.Dispatch('Word.Application')
-wordApp.Visible = 1
-wordApp.DisplayAlerts = 0
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+def initialize():
+    wordApp = client.Dispatch('Word.Application')
+    wordApp.Visible = 1
+    wordApp.DisplayAlerts = 0
+    return wordApp
 
-sampleDoc = wordApp.Documents.Open(dir_path + '\\sample.docx')
-testDoc = wordApp.Documents.Open(dir_path + '\\test.docx')
 
 class DocumentStyle:
     def __init__(self, doc):
@@ -37,23 +36,43 @@ class DocumentStyle:
 
 class ParagraphStyle:
     def __init__(self, paragraph):
-        self.name = paragraph.style
+        self.paragraph = paragraph
+        self.name = str(paragraph.style)
         self.font = paragraph.style.font
-        self.format = paragraph.format
+        self.format = paragraph.style.paragraphformat
 
 
 def checkFormatting(testdocument, sampledocument):
     print('Text formatting:')
-    checkTextStyle(testdocument, sampledocument)
+    checkParagraphStyle(testdocument, sampledocument)
     print('\nPage formatting:')
     checkMargins(testdocument, sampledocument)
 
 
-def checkTextStyle(testdocument, sampledocument):
-    for p in range(len(testdocument.paragraphs)):
-        print(f'\nParagraph {p + 1}:')
-        checkFormatProperties(testdocument.paragraphStyles[p].format, sampledocument.paragraphStyles[0].format)
-        checkFontProperties(testdocument.paragraphStyles[p].font, sampledocument.paragraphStyles[0].font)
+def checkParagraphStyle(testdocument, sampledocument):
+    usedStyles = []
+    testlen = len(testdocument.paragraphs)
+    samplelen = len(sampledocument.paragraphs)
+
+    for p in range(testlen):
+        currentStyle = testdocument.paragraphStyles[p].name
+        if currentStyle not in usedStyles:
+            usedStyles.append(currentStyle)
+
+            if p == 0:
+                print('\nTitle paragraph(s):')
+                checkFormatProperties(testdocument.paragraphStyles[p].format, sampledocument.paragraphStyles[p].format)
+                checkFontProperties(testdocument.paragraphStyles[p].font, sampledocument.paragraphStyles[p].font)
+
+            elif p == testlen - 1:
+                print('\nEnding paragraph:')
+                checkFormatProperties(testdocument.paragraphStyles[p].format, sampledocument.paragraphStyles[samplelen - 1].format)
+                checkFontProperties(testdocument.paragraphStyles[p].font, sampledocument.paragraphStyles[samplelen - 1].font)
+
+            else:
+                print('\nBody paragraph(s):')
+                checkFormatProperties(testdocument.paragraphStyles[p].format, sampledocument.paragraphStyles[1].format)
+                checkFontProperties(testdocument.paragraphStyles[p].font, sampledocument.paragraphStyles[1].font)
 
 
 def checkMargins(testdocument, sampledocument):
@@ -110,7 +129,15 @@ def checkFormatProperties(testformat, sampleformat):
         testformat.spacebefore = sampleformat.spacebefore
 
 
+app = initialize()
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sampleDoc = app.Documents.Open(dir_path + '\\sample.docx')
+testDoc = app.Documents.Open(dir_path + '\\test.docx')
+
 testDocument = DocumentStyle(testDoc)
 sampleDocument = DocumentStyle(sampleDoc)
 checkFormatting(testDocument, sampleDocument)
+
+testDoc.SaveAs(dir_path + '\\test_formatted.docx')
 sampleDoc.Close()
