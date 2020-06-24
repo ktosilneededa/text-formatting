@@ -12,11 +12,11 @@ def initialize():
 class DocumentStyle:
     def __init__(self, doc):
         self.document = doc
-        self.paragraphs = doc.Paragraphs
-        self.paragraphStyles = self.getStyle()
+        self.paragraphs = doc.paragraphs
+        self.paragraphStyles = self.getParagraphStyle()
         self.margins = self.getMargins()
 
-    def getStyle(self):
+    def getParagraphStyle(self):
         paragraphs = []
         for p in self.paragraphs:
             paragraphs.append(ParagraphStyle(p))
@@ -38,41 +38,53 @@ class ParagraphStyle:
     def __init__(self, paragraph):
         self.paragraph = paragraph
         self.name = str(paragraph.style)
-        self.font = paragraph.style.font
+        self.characterStyles = self.getCharacterStyle()
+        # self.font = paragraph.style.font
         self.format = paragraph.style.paragraphformat
+
+    def getCharacterStyle(self):
+        characters = []
+        for c in self.paragraph.Range.Characters:
+            characters.append(CharacterStyle(c))
+        return characters
+
+
+class CharacterStyle:
+    def __init__(self, character):
+        self.character = character
+        self.font = character.Font
 
 
 def checkFormatting(testdocument, sampledocument):
     print('Text formatting:')
-    checkParagraphStyle(testdocument, sampledocument)
+    checkStyle(testdocument, sampledocument)
     print('\nPage formatting:')
     checkMargins(testdocument, sampledocument)
 
 
-def checkParagraphStyle(testdocument, sampledocument):
+def checkStyle(testdocument, sampledocument):
     usedStyles = []
     testlen = len(testdocument.paragraphs)
     samplelen = len(sampledocument.paragraphs)
 
-    for p in range(testlen):
-        currentStyle = testdocument.paragraphStyles[p].name
+    for par in range(testlen):
+        currentStyle = testdocument.paragraphStyles[par].name
         if currentStyle not in usedStyles:
             usedStyles.append(currentStyle)
 
-            if p == 0:
+            if par == 0:
                 print('\nTitle paragraph(s):')
-                checkFormatProperties(testdocument.paragraphStyles[p].format, sampledocument.paragraphStyles[p].format)
-                checkFontProperties(testdocument.paragraphStyles[p].font, sampledocument.paragraphStyles[p].font)
-
-            elif p == testlen - 1:
-                print('\nEnding paragraph:')
-                checkFormatProperties(testdocument.paragraphStyles[p].format, sampledocument.paragraphStyles[samplelen - 1].format)
-                checkFontProperties(testdocument.paragraphStyles[p].font, sampledocument.paragraphStyles[samplelen - 1].font)
+                checkParagraphStyle(testdocument.paragraphStyles[par].format, sampledocument.paragraphStyles[par].format)
+                for character in range(len(testdocument.paragraphStyles[par].characterStyles)):
+                    checkCharacterStyle(testdocument.paragraphStyles[par].characterStyles[character].font,
+                                    sampledocument.paragraphStyles[par].characterStyles[1].font)
 
             else:
                 print('\nBody paragraph(s):')
-                checkFormatProperties(testdocument.paragraphStyles[p].format, sampledocument.paragraphStyles[1].format)
-                checkFontProperties(testdocument.paragraphStyles[p].font, sampledocument.paragraphStyles[1].font)
+                checkParagraphStyle(testdocument.paragraphStyles[par].format, sampledocument.paragraphStyles[1].format)
+                for character in range(len(testdocument.paragraphStyles[par].characterStyles)):
+                    checkCharacterStyle(testdocument.paragraphStyles[par].characterStyles[character].font,
+                                    sampledocument.paragraphStyles[1].characterStyles[1].font)
 
 
 def checkMargins(testdocument, sampledocument):
@@ -81,33 +93,41 @@ def checkMargins(testdocument, sampledocument):
         if testdocument.margins[m] != sampledocument.margins[m]:
             wrongMarginsCount += 1
     if wrongMarginsCount > 0:
-        testdocument.setMargins(sampledocument.margins)
+        # testdocument.setMargins(sampledocument.margins)
         print('Wrong margins')
+    else:
+        print('Correct')
 
 
-def checkFontProperties(testfont, samplefont):
-    if testfont.name != samplefont.name:
-        print(f'Wrong font name: {testfont.name} - should be {samplefont.name}')
-        testfont.name = samplefont.name
-
-    if testfont.size != samplefont.size:
-        print(f'Wrong font size: {testfont.size} - should be {samplefont.size}')
-        testfont.size = samplefont.size
-
-    if testfont.bold != samplefont.bold:
-        print(f'Wrong font weight: {testfont.bold} - should be {samplefont.bold}')
-        testfont.bold = samplefont.bold
-
-    if testfont.italic != samplefont.italic:
-        print(f'Wrong cursive: {testfont.italic} - should be {samplefont.italic}')
-        testfont.italic = samplefont.italic
+def checkCharacterStyle(testfont, samplefont):
 
     if testfont.color != samplefont.color:
         print(f'Wrong text color: {testfont.color} - should be {samplefont.color}')
-        testfont.color = samplefont.color
+        # testfont.color = samplefont.color
+        testfont.color = '255'
+
+    if testfont.name != samplefont.name:
+        print(f'Wrong font name: {testfont.name} - should be {samplefont.name}')
+        # testfont.name = samplefont.name
+        testfont.color = '255'
+
+    if testfont.size != samplefont.size:
+        print(f'Wrong font size: {testfont.size} - should be {samplefont.size}')
+        # testfont.size = samplefont.size
+        testfont.color = '255'
+
+    if testfont.bold != samplefont.bold:
+        print(f'Wrong font weight: {testfont.bold} - should be {samplefont.bold}')
+        # testfont.bold = samplefont.bold
+        testfont.color = '255'
+
+    if testfont.italic != samplefont.italic:
+        print(f'Wrong cursive: {testfont.italic} - should be {samplefont.italic}')
+        # testfont.italic = samplefont.italic
+        testfont.color = '255'
 
 
-def checkFormatProperties(testformat, sampleformat):
+def checkParagraphStyle(testformat, sampleformat):
     if testformat.alignment != sampleformat.alignment:
         print(f'Wrong text alignment: {testformat.alignment} - should be {sampleformat.alignment}')
         testformat.alignment = sampleformat.alignment
