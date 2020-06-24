@@ -39,7 +39,6 @@ class ParagraphStyle:
         self.paragraph = paragraph
         self.name = str(paragraph.style)
         self.characterStyles = self.getCharacterStyle()
-        # self.font = paragraph.style.font
         self.format = paragraph.style.paragraphformat
 
     def getCharacterStyle(self):
@@ -63,28 +62,37 @@ def checkFormatting(testdocument, sampledocument):
 
 
 def checkStyle(testdocument, sampledocument):
-    usedStyles = []
-    testlen = len(testdocument.paragraphs)
-    samplelen = len(sampledocument.paragraphs)
+    pars = len(sampledocument.paragraphs)
 
-    for par in range(testlen):
-        currentStyle = testdocument.paragraphStyles[par].name
-        if currentStyle not in usedStyles:
-            usedStyles.append(currentStyle)
+    for par_i in range(pars):
+        chars_in_pars = len(testdocument.paragraphStyles[par_i].characterStyles)
+        char_diffs = [0] * (chars_in_pars + 1)
+        red_messages = []
+        red_phrases = []
+        count = 0
 
-            if par == 0:
-                print('\nTitle paragraph(s):')
-                checkParagraphStyle(testdocument.paragraphStyles[par].format, sampledocument.paragraphStyles[par].format)
-                for character in range(len(testdocument.paragraphStyles[par].characterStyles)):
-                    checkCharacterStyle(testdocument.paragraphStyles[par].characterStyles[character].font,
-                                    sampledocument.paragraphStyles[par].characterStyles[1].font)
+        print(f'\nParagraph {par_i + 1}: ')
+        checkParagraphStyle(testdocument.paragraphStyles[par_i].format, sampledocument.paragraphStyles[par_i].format)
+        for char_i in range(chars_in_pars):
+            character, diff = checkCharacterStyle(testdocument.paragraphStyles[par_i].characterStyles[char_i],
+                            sampledocument.paragraphStyles[par_i].characterStyles[char_i])
+            char_diffs[char_i] = diff
+            if diff != '' and diff != char_diffs[char_i - 1]:
+                count += 1
+                red_phrases.append('\n')
+                red_phrases.append(str(character))
+                red_messages.append(diff)
+            if diff == char_diffs[char_i - 1] and diff != '':
+                red_phrases.append(str(character))
 
-            else:
-                print('\nBody paragraph(s):')
-                checkParagraphStyle(testdocument.paragraphStyles[par].format, sampledocument.paragraphStyles[1].format)
-                for character in range(len(testdocument.paragraphStyles[par].characterStyles)):
-                    checkCharacterStyle(testdocument.paragraphStyles[par].characterStyles[character].font,
-                                    sampledocument.paragraphStyles[1].characterStyles[1].font)
+        if count == 0:
+            print('Character style is correct')
+        else:
+            red_phrases = ''.join(red_phrases)
+            red_phrases = red_phrases.splitlines()
+
+            for m in range(len(red_messages)):
+                print(f'Red area \'{red_phrases[m + 1]}\': {red_messages[m]}')
 
 
 def checkMargins(testdocument, sampledocument):
@@ -93,60 +101,67 @@ def checkMargins(testdocument, sampledocument):
         if testdocument.margins[m] != sampledocument.margins[m]:
             wrongMarginsCount += 1
     if wrongMarginsCount > 0:
-        # testdocument.setMargins(sampledocument.margins)
         print('Wrong margins')
     else:
-        print('Correct')
+        print('Margins are correct')
 
 
-def checkCharacterStyle(testfont, samplefont):
+def checkCharacterStyle(testchar, samplechar):
+    color_wrong = '255'
+    message = ''
+    character = ''
 
-    if testfont.color != samplefont.color:
-        print(f'Wrong text color: {testfont.color} - should be {samplefont.color}')
-        # testfont.color = samplefont.color
-        testfont.color = '255'
+    if testchar.font.color != samplechar.font.color:
+        message += f'Wrong text color: {testchar.font.color} - should be {samplechar.font.color} '
+        testchar.font.color = color_wrong
 
-    if testfont.name != samplefont.name:
-        print(f'Wrong font name: {testfont.name} - should be {samplefont.name}')
-        # testfont.name = samplefont.name
-        testfont.color = '255'
+    if testchar.font.name != samplechar.font.name:
+        message += f'Wrong font name: {testchar.font.name} - should be {samplechar.font.name} '
+        testchar.font.color = color_wrong
 
-    if testfont.size != samplefont.size:
-        print(f'Wrong font size: {testfont.size} - should be {samplefont.size}')
-        # testfont.size = samplefont.size
-        testfont.color = '255'
+    if testchar.font.size != samplechar.font.size:
+        message += f'Wrong font size: {testchar.font.size} - should be {samplechar.font.size} '
+        testchar.font.color = color_wrong
 
-    if testfont.bold != samplefont.bold:
-        print(f'Wrong font weight: {testfont.bold} - should be {samplefont.bold}')
-        # testfont.bold = samplefont.bold
-        testfont.color = '255'
+    if testchar.font.bold != samplechar.font.bold:
+        message += f'Wrong font weight: {testchar.font.bold} - should be {samplechar.font.bold} '
+        testchar.font.color = color_wrong
 
-    if testfont.italic != samplefont.italic:
-        print(f'Wrong cursive: {testfont.italic} - should be {samplefont.italic}')
-        # testfont.italic = samplefont.italic
-        testfont.color = '255'
+    if testchar.font.italic != samplechar.font.italic:
+        message += f'Wrong cursive: {testchar.font.italic} - should be {samplechar.font.italic} '
+        testchar.font.color = color_wrong
+
+    if message != '':
+        character = samplechar.character
+
+    return character, message
 
 
 def checkParagraphStyle(testformat, sampleformat):
+    count = 0
+
     if testformat.alignment != sampleformat.alignment:
         print(f'Wrong text alignment: {testformat.alignment} - should be {sampleformat.alignment}')
-        testformat.alignment = sampleformat.alignment
+        count += 1
 
     if testformat.firstlineindent != sampleformat.firstlineindent:
         print(f'Wrong first line indent: {testformat.firstlineindent} - should be {sampleformat.firstlineindent}')
-        testformat.firstlineindent = sampleformat.firstlineindent
+        count += 1
 
     if testformat.linespacing != sampleformat.linespacing:
         print(f'Wrong line spacing: {testformat.linespacing} - should be {sampleformat.linespacing}')
-        testformat.linespacing = sampleformat.linespacing
+        count += 1
 
     if testformat.spaceafter != sampleformat.spaceafter:
         print(f'Wrong spacing after paragraph: {testformat.spaceafter} - should be {sampleformat.spaceafter}')
-        testformat.spaceafter = sampleformat.spaceafter
+        count += 1
 
     if testformat.spacebefore != sampleformat.spacebefore:
         print(f'Wrong spacing before paragraph: {testformat.spacebefore} - should be {sampleformat.spacebefore}')
-        testformat.spacebefore = sampleformat.spacebefore
+        count += 1
+
+    if count == 0:
+        print('Paragraph style is correct')
 
 
 app = initialize()
