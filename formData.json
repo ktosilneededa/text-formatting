@@ -1,0 +1,31 @@
+{
+    "sections": [
+        {
+            "orientation": "portrait",
+            "leftMargin": 3.0,
+            "rightMargin": 1.0,
+            "topMargin": 2.0,
+            "bottomMargin": 2.0
+        },
+        {
+            "orientation": "landscape",
+            "leftMargin": 2.0,
+            "rightMargin": 2.0,
+            "topMargin": 3.0,
+            "bottomMargin": 1.0
+        }
+    ],
+    "styles": [
+        {
+            "Heading 1": {
+                "paragraphFormat": {
+                    "alignment": "left",
+                    "firstLineIndent": 2.5,
+                    "lineSpacing": 1.0,
+                    "spaceAfter": 8.0,
+                    "spaceBefore": 8.0
+                }
+            }
+        }
+    ]
+}
