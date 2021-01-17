@@ -3,6 +3,7 @@ import json
 from docx import Document
 from dictdiffer import diff
 
+
 filePath = 'sample.docx'
 formDataJson = 'formData.json'
 
@@ -43,7 +44,7 @@ def getBaseStyleProperty(paragraph, property):
 
 
 def zeroIfNone(value):
-    return value if not None else 0
+    return value if value is not None else 0.0
 
 
 def checkFormatting(formdatapath, sampledatapath):
