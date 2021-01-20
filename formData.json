@@ -12,14 +12,31 @@
             "leftMargin": 2.0,
             "rightMargin": 2.0,
             "topMargin": 3.0,
-            "bottomMargin": 1.0
+            "bottomMargin": 2.0
         }
     ],
-    "styles": [
-        {
+    "styles": {
             "Heading 1": {
                 "paragraphFormat": {
                     "alignment": "left",
+                    "firstLineIndent": 2.5,
+                    "lineSpacing": 1.0,
+                    "spaceAfter": 80.0,
+                    "spaceBefore": 8.0
+                }
+            },
+            "Heading 2": {
+                "paragraphFormat": {
+                    "alignment": "left",
+                    "firstLineIndent": 2.5,
+                    "lineSpacing": 100.0,
+                    "spaceAfter": 8.0,
+                    "spaceBefore": 8.0
+                }
+            },
+            "Normal": {
+                "paragraphFormat": {
+                    "alignment": "right",
                     "firstLineIndent": 2.5,
                     "lineSpacing": 1.0,
                     "spaceAfter": 8.0,
@@ -27,5 +44,4 @@
                 }
             }
         }
-    ]
 }
